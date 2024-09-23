@@ -62,6 +62,18 @@ service /programmes on new http:Listener(8080) {
         } else {
             check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
         }
-    }}
+    }
+// Delete a programme's record
+        resource function delete deleteProgramme(http:Caller caller, http: Request req, string programmeCode) returns error? { 
+           if programmeDB.hasKey(programmeCode) { // Check if the programme exists in the database. 
+               Programme = programmeDB.remove(programmeCode); // Remove the programme from the database. 
+               check caller->respond("Programme deleted successfully."); // Send a success response to the client.
+         } else {
+            check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
+         }
+} }
+    }
+}
+}
     }
 }
