@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package shopApp;
+
+service Shopping {
+
+    // managing functionalities for admin
+    rpc AddProduct (Product) returns (ProductResponse);
+    rpc UpdateProduct (Product) returns (ProductResponse);
+    rpc RemoveProduct (ProductSKU) returns (ProductListResponse);
+    rpc ListAllOrders (google.protobuf.Empty) returns (OrderListResponse);
+
+    // user functionalities
+    rpc CreateUsers (stream User) returns (UserResponse);
+    rpc ListAvailableProducts (google.protobuf.Empty) returns (ProductListResponse);
+    rpc SearchProduct (ProductSKU) returns (ProductResponse);
+    rpc AddToCart (CartRequest) returns (CartResponse);
+    rpc PlaceOrder (OrderRequest) returns (OrderResponse);
+
+}
+
+// product definitions according to functionalities
+message Product {
+    string name = 1;
+    string description = 2;
+    double price = 3;
+    int32 stock_quantity = 4;
+    string sku = 5;
+    string status = 6;
+}
+
+message ProductSKU {
+    string sku = 1;
+}
+
+message ProductResponse {
+    string message = 1;
+    Product product = 2;
+}
+
+message ProductListResponse {
+    repeated Product products = 1;
+}
+
+// user definitions according to functionalities
+message User {
+    string id = 1;
+    string name = 2;
+    string role = 3; // customer or admin
+}
+
+message UserResponse {
+    string message = 1;
+}
+
+message Cart {
+    string user_id = 1;
+    repeated Product products = 2;
+}
+
+message CartRequest {
+    string user_id = 1;
+    string sku = 2;
+}
+
+message CartResponse {
+    string message = 1;
+    Cart cart = 2;
+}
+
+message Order {
+    string order_id = 1;
+    string user_id = 2;
+    repeated Product products = 3;
+    string status = 4;
+}
+
+message OrderRequest {
+    string user_id = 1;
+}
+
+message OrderResponse {
+    string message = 1;
+    Order order = 2;
+}
+
+message OrderListResponse {
+    repeated Order orders = 1;
+}
