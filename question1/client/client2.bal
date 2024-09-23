@@ -70,33 +70,26 @@ public function main() returns error? {
     } else {
         io:println("Failed to add programme: ", response.message()); // Print an error message if the request fails.
     }
-}
 
-}
+    // Retrieve all programmes
+    response = apiClient->get("/listProgrammes"); // Send a GET request to retrieve all programmes.
+    if (response is http:Response) {
+        json|error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
+        if (jsonPayload is json && jsonPayload is json[]) {
+            Programme[] programmes = []; // Create an empty list to store the programmes.
+            foreach json programmeJson in jsonPayload { // Iterate over each programme in the JSON response.
+                Programme programme = check programmeJson.cloneWithType(Programme); // Convert JSON object to Programme record.
+                programmes.push(programme); // Add the programme to the list.
+            }
+            io:println("All Programmes: ", programmes); // Print the list of all programmes.
+        } else {
+            io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error message if JSON parsing fails.
+        }
+    } else {
+        io:println("Failed to retrieve programmes: ", response.message()); // Print an error message if the request fails.
+    }
 
-
-// Retrieve all programmes
-response apiClient->get("/listProgrammes"); // Send a GET request to retrieve all programmes.
-if (response is http: Response) {
-json error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
-if (jsonPayload is json && jsonPayload is json[]) {
-    Programme[] programmes = []; // Create an empty list to store the programmes.
-    foreach json programmeJson in jsonPayload { // Iterate over each programme in the JSON response.
-    programme check programmeJson.cloneWithType (Programme); // Convert JSON object to Programme record. programmes.push(programme); // Add the programme to the list.
-
-}
-
-I io:println("All Programmes: ", programmes); // Print the list of all programmes.
-
-} else {
-io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error message if JSON parsing fails.
-}
-
-} else {
-io:println("Failed to retrieve programmes: ", response.message()); // Print an error message if the request fails.
-
-}
-  // Retrieve a specific programme by programmeCode using query parameters
+    // Retrieve a specific programme by programmeCode using query parameters
     string programmeCode = ""; // Define the programme code to search for.
     response = apiClient->get("/getProgramme?programmeCode=" + programmeCode); // Send a GET request to retrieve the specific programme by code.
     if (response is http:Response) {
@@ -110,3 +103,24 @@ io:println("Failed to retrieve programmes: ", response.message()); // Print an e
     } else {
         io:println("Failed to retrieve programme: ", response.message()); // Print an error message if the request fails.
     }
+
+    // Update an existing programme using query parameters
+    newProgramme.nqfLevel = 8; // Update the NQF level of the programme.
+    response = apiClient->put("/updateProgramme?programmeCode=" + programmeCode, newProgramme); // Send a PUT request to update the programme details.
+    if (response is http:Response) {
+        string responseBody = check response.getTextPayload(); // Extract the response payload as text.
+        io:println("Update Programme Response: ", responseBody); // Print the response from the server.
+    } else {
+        io:println("Failed to update programme: ", response.message()); // Print an error message if the request fails.
+    }
+
+    //  Delete a programme using query parameters
+    response = apiClient->delete("/deleteProgramme?programmeCode=" + programmeCode); // Send a DELETE request to remove the programme.
+    if (response is http:Response) {
+        string responseBody = check response.getTextPayload(); // Extract the response payload as text.
+        io:println("Delete Programme Response: ", responseBody); // Print the response from the server.
+    } else {
+        io:println("Failed to delete programme: ", response.message()); // Print an error message if the request fails.
+    }
+
+}
