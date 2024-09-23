@@ -71,3 +71,28 @@ public function main() returns error? {
         io:println("Failed to add programme: ", response.message()); // Print an error message if the request fails.
     }
 }
+
+}
+
+
+// Retrieve all programmes
+response apiClient->get("/listProgrammes"); // Send a GET request to retrieve all programmes.
+if (response is http: Response) {
+json error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
+if (jsonPayload is json && jsonPayload is json[]) {
+    Programme[] programmes = []; // Create an empty list to store the programmes.
+    foreach json programmeJson in jsonPayload { // Iterate over each programme in the JSON response.
+    programme check programmeJson.cloneWithType (Programme); // Convert JSON object to Programme record. programmes.push(programme); // Add the programme to the list.
+
+}
+
+I io:println("All Programmes: ", programmes); // Print the list of all programmes.
+
+} else {
+io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error message if JSON parsing fails.
+}
+
+} else {
+io:println("Failed to retrieve programmes: ", response.message()); // Print an error message if the request fails.
+
+}
