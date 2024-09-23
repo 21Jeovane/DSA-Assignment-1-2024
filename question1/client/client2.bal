@@ -96,3 +96,17 @@ io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error mes
 io:println("Failed to retrieve programmes: ", response.message()); // Print an error message if the request fails.
 
 }
+  // Retrieve a specific programme by programmeCode using query parameters
+    string programmeCode = ""; // Define the programme code to search for.
+    response = apiClient->get("/getProgramme?programmeCode=" + programmeCode); // Send a GET request to retrieve the specific programme by code.
+    if (response is http:Response) {
+        json|error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
+        if (jsonPayload is json) {
+            Programme programme = check jsonPayload.cloneWithType(Programme); // Convert JSON object to Programme record.
+            io:println("Programme Details: ", programme); // Print the details of the programme.
+        } else {
+            io:println("Failed to parse JSON payload: ", jsonPayload.message()); // Print an error message if JSON parsing fails.
+        }
+    } else {
+        io:println("Failed to retrieve programme: ", response.message()); // Print an error message if the request fails.
+    }
