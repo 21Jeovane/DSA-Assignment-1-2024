@@ -122,5 +122,40 @@ public function main() returns error? {
     } else {
         io:println("Failed to delete programme: ", response.message()); // Print an error message if the request fails.
     }
+ //  Retrieve all programmes due for review
+    response = apiClient->get("/programmesDueForReview"); // Send a GET request to retrieve programmes due for review.
+    if (response is http:Response) {
+        json|error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
+        if (jsonPayload is json && jsonPayload is json[]) {
+            Programme[] dueProgrammes = []; // Create an empty list to store programmes due for review.
+            foreach json programmeJson in jsonPayload { // Iterate over each programme in the JSON response.
+                Programme programme = check programmeJson.cloneWithType(Programme); // Convert JSON object to Programme record.
+                dueProgrammes.push(programme); // Add the programme to the list of due programmes.
+            }
+            io:println("Programmes Due for Review: ", dueProgrammes); // Print the list of programmes due for review.
+        } else {
+            io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error message if JSON parsing fails.
+        }
+    } else {
+        io:println("Failed to retrieve programmes due for review: ", response.message()); // Print an error message if the request fails.
+    }
 
+    //  Retrieve all programmes by faculty using query parameters
+    string facultyName = "Faculty of Informatics and Computing"; // Define the faculty name to search for.
+    response = apiClient->get("/programmesByFaculty?facultyName=" + facultyName); // Send a GET request to retrieve programmes by faculty.
+    if (response is http:Response) {
+        json|error jsonPayload = response.getJsonPayload(); // Extract the response payload as JSON.
+        if (jsonPayload is json && jsonPayload is json[]) {
+            Programme[] facultyProgrammes = []; // Create an empty list to store programmes from the specified faculty.
+            foreach json programmeJson in jsonPayload { // Iterate over each programme in the JSON response.
+                Programme programme = check programmeJson.cloneWithType(Programme); // Convert JSON object to Programme record.
+                facultyProgrammes.push(programme); // Add the programme to the list of faculty programmes.
+            }
+            io:println("Programmes in Faculty: ", facultyProgrammes); // Print the list of programmes in the specified faculty.
+        } else {
+            io:println("Failed to parse JSON payload: ", jsonPayload); // Print an error message if JSON parsing fails.
+        }
+    } else {
+        io:println("Failed to retrieve programmes by faculty: ", response.message()); // Print an error message if the request fails.
+    }
 }
