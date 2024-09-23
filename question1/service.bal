@@ -32,4 +32,28 @@ service /programmes on new http:Listener(8080) {
             check caller->respond("Invalid JSON payload."); // Send an error response if the JSON is invalid.
         }
     }
+ // Retrieve a list of all programmes
+    resource function get listProgrammes(http:Caller caller, http:Request req) returns error? {
+        Programme[] allProgrammes = []; // Create an empty list to hold all programmes.
+        foreach var [_, programme] in programmeDB.entries() { // Iterate through all programmes in the database.
+            allProgrammes.push(programme); // Add each programme to the list.
+        }
+        check caller->respond(allProgrammes); // Send the list of programmes as a response to the client.
+    }
+
+    // Update an existing programme
+    resource function put updateProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
+        if !programmeDB.hasKey(programmeCode) { // Check if the programme exists in the database.
+            check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
+        } else {
+            json|error jsonPayload = req.getJsonPayload(); // Extract the JSON payload from the request.
+            if jsonPayload is json {
+                Programme updatedProgramme = check jsonPayload.cloneWithType(Programme); // Convert the JSON to a Programme record.
+                programmeDB[programmeCode] = updatedProgramme; // Update the existing programme in the database.
+                check caller->respond("Programme updated successfully."); // Send a success response to the client.
+            } else {
+                check caller->respond("Invalid JSON payload."); // Send an error response if the JSON is invalid.
+            }
+        }
+    }
 }
