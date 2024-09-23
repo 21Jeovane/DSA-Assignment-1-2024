@@ -54,6 +54,14 @@ service /programmes on new http:Listener(8080) {
             } else {
                 check caller->respond("Invalid JSON payload."); // Send an error response if the JSON is invalid.
             }
+         // Retrieve the details of a specific programme
+    resource function get getProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
+        Programme? programme = programmeDB[programmeCode]; // Retrieve the programme by its code.
+        if programme is Programme {
+            check caller->respond(programme); // Send the programme details as a response if it exists.
+        } else {
+            check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
         }
+    }}
     }
 }
