@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package shopping;
+
+// Service definition
+service ShoppingService {
+  // Admin operations
+  rpc AddProduct (AddProductRequest) returns (AddProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
+  rpc RemoveProduct (RemoveProductRequest) returns (RemoveProductResponse);
+  rpc ListAllOrders (Empty) returns (OrderList);
+
+  // Customer operations
+  rpc ListAvailableProducts (Empty) returns (ProductList);
+  rpc SearchProduct (SearchProductRequest) returns (SearchProductResponse);
+  rpc AddToCart (AddToCartRequest) returns (CartResponse);
+  rpc PlaceOrder (PlaceOrderRequest) returns (OrderResponse);
+
+  // Common operation
+  rpc CreateUsers (stream UserProfile) returns (UserCreationResponse);
+}
+
+// Product message
+message Product {
+  string id = 1;             // Unique product ID
+  string name = 2;           // Product name
+  string description = 3;    // Product description
+  double price = 4;          // Product price
+  int32 stock_quantity = 5;  // Stock quantity
+  string sku = 6;            // Stock Keeping Unit
+  string status = 7;         // Product status (available or out of stock)
+}
+
+// Add Product request and response
+message AddProductRequest {
+  Product product = 1;
+}
+
+message AddProductResponse {
+  string product_id = 1;  // Unique code for added product
+}
+
+// Update Product request and response
+message UpdateProductRequest {
+  string product_id = 1;
+  Product updated_product = 2;
+}
+
+message UpdateProductResponse {
+  string message = 1;
+}
+
+// Remove Product request and response
+message RemoveProductRequest {
+  string product_id = 1;
+}
+
+message RemoveProductResponse {
+  repeated Product products = 1;  // Updated product list after removal
+}
+
+// List available products
+message ProductList {
+  repeated Product products = 1;
+}
+
+// Search product request and response
+message SearchProductRequest {
+  string sku = 1;
+}
+
+message SearchProductResponse {
+  Product product = 1;
+  bool is_available = 2;
+}
+
+// Add to cart request and response
+message AddToCartRequest {
+  string user_id = 1;
+  string sku = 2;
+}
+
+message CartResponse {
+  string message = 1;
+}
+
+// Place order request and response
+message PlaceOrderRequest {
+  string user_id = 1;
+}
+
+message OrderResponse {
+  string order_id = 1;
+  string message = 2;
+}
+
+// List of orders
+message OrderList {
+  repeated Order orders = 1;
+}
+
+// Order details
+message Order {
+  string order_id = 1;
+  string user_id = 2;
+  repeated Product products = 3;
+  double total_price = 4;
+  string status = 5;
+}
+
+// Create user request and response
+message UserProfile {
+  string user_id = 1;
+  string username = 2;
+  string role = 3;  // "admin" or "customer"
+}
+
+message UserCreationResponse {
+  string message = 1;
+}
+
+// Empty message for list operations
+message Empty {};
