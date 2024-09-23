@@ -98,4 +98,15 @@ service /programmes on new http:Listener(8080) {
         }
         check caller->respond(dueProgrammes); // Send the list of due programmes as a response to the client.
     }
+
+ // Retrieve all programmes belonging to the same faculty
+    resource function get programmesByFaculty(http:Caller caller, http:Request req, string facultyName) returns error? {
+        Programme[] facultyProgrammes = []; // Create an empty list to hold programmes from the specified faculty.
+        foreach var [_, programme] in programmeDB.entries() { // Iterate through all programmes in the database.
+            if programme.facultyName == facultyName { // Check if the programme belongs to the specified faculty.
+                facultyProgrammes.push(programme); // Add the programme to the list of faculty programmes.
+            }
+        }
+        check caller->respond(facultyProgrammes); // Send the list of faculty programmes as a response to the client.
+    }
 }
