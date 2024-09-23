@@ -1,4 +1,3 @@
-//import ballerina/io;
 import ballerina/http; // Import the HTTP module to create an HTTP service.
 
 type Course record {
@@ -21,6 +20,7 @@ type Programme record {
 map<Programme> programmeDB = {}; // A map to store Programmes with their codes as keys.
 
 service /programmes on new http:Listener(8080) {
+
     // Add a new programme
     resource function post addProgramme(http:Caller caller, http:Request req) returns error? {
         json|error jsonPayload = req.getJsonPayload(); // Extract the JSON payload from the request.
@@ -32,7 +32,8 @@ service /programmes on new http:Listener(8080) {
             check caller->respond("Invalid JSON payload."); // Send an error response if the JSON is invalid.
         }
     }
- // Retrieve a list of all programmes
+
+    // Retrieve a list of all programmes
     resource function get listProgrammes(http:Caller caller, http:Request req) returns error? {
         Programme[] allProgrammes = []; // Create an empty list to hold all programmes.
         foreach var [_, programme] in programmeDB.entries() { // Iterate through all programmes in the database.
@@ -54,7 +55,10 @@ service /programmes on new http:Listener(8080) {
             } else {
                 check caller->respond("Invalid JSON payload."); // Send an error response if the JSON is invalid.
             }
-         // Retrieve the details of a specific programme
+        }
+    }
+
+    // Retrieve the details of a specific programme
     resource function get getProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
         Programme? programme = programmeDB[programmeCode]; // Retrieve the programme by its code.
         if programme is Programme {
@@ -63,17 +67,35 @@ service /programmes on new http:Listener(8080) {
             check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
         }
     }
-// Delete a programme's record
-        resource function delete deleteProgramme(http:Caller caller, http: Request req, string programmeCode) returns error? { 
-           if programmeDB.hasKey(programmeCode) { // Check if the programme exists in the database. 
-               Programme = programmeDB.remove(programmeCode); // Remove the programme from the database. 
-               check caller->respond("Programme deleted successfully."); // Send a success response to the client.
-         } else {
+
+    // Delete a programme's record
+    resource function delete deleteProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
+        if programmeDB.hasKey(programmeCode) { // Check if the programme exists in the database.
+            Programme _ = programmeDB.remove(programmeCode); // Remove the programme from the database.
+            check caller->respond("Programme deleted successfully."); // Send a success response to the client.
+        } else {
             check caller->respond("Programme not found."); // Send an error response if the programme does not exist.
-         }
-} }
+        }
     }
-}
-}
+
+    // Retrieve all programmes due for review
+    resource function get programmesDueForReview(http:Caller caller, http:Request req) returns error? {
+        string currentDate = "2024-09-01"; // Hardcoded current date for comparison; use actual current date in practice.
+        Programme[] dueProgrammes = []; // Create an empty list to hold programmes due for review.
+        string currentYear = currentDate.substring(0, 4); // Extract the year from the current date.
+
+        foreach var [_, programme] in programmeDB.entries() { // Iterate through all programmes in the database.
+            string registrationDate = programme.registrationDate; 
+            string registrationYear = registrationDate.substring(0, 4); // Extract the year from the registration date.
+
+            int registrationYearInt = check int:fromString(registrationYear); // Convert the registration year to an integer.
+            int currentYearInt = check int:fromString(currentYear); // Convert the current year to an integer.
+
+            // Check if the programme is due for review (every 5 years).
+            if (registrationYearInt + 5 <= currentYearInt) {
+                dueProgrammes.push(programme); // Add the programme to the list of due programmes.
+            }
+        }
+        check caller->respond(dueProgrammes); // Send the list of due programmes as a response to the client.
     }
 }
